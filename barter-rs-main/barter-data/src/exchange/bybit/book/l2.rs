@@ -1,12 +1,12 @@
-use std::vec;
+use std::{marker::PhantomData, vec};
 
 use crate::{
     Identifier,
     error::DataError,
     event::{MarketEvent, MarketIter},
     exchange::{
-        Connector,
-        bybit::{Bybit, message::BybitPayloadKind, spot::BybitSpot},
+        ExchangeServer,
+        bybit::{Bybit, message::BybitPayloadKind},
     },
     subscription::{
         Map,
@@ -29,15 +29,17 @@ pub struct BybitOrderBookL2Meta<InstrumentKey, Sequencer> {
 }
 
 #[derive(Debug)]
-pub struct BybitOrderBooksL2Transformer<InstrumentKey> {
+pub struct BybitOrderBooksL2Transformer<InstrumentKey, Server> {
     instrument_map: Map<BybitOrderBookL2Meta<InstrumentKey, BybitOrderBookL2Sequencer>>,
+    server: PhantomData<Server>,
 }
 
 #[async_trait]
 impl<InstrumentKey, Server> ExchangeTransformer<Bybit<Server>, InstrumentKey, OrderBooksL2>
-    for BybitOrderBooksL2Transformer<InstrumentKey>
+    for BybitOrderBooksL2Transformer<InstrumentKey, Server>
 where
     InstrumentKey: Clone + PartialEq + Send + Sync,
+    Server: ExchangeServer,
 {
     async fn init(
         instrument_map: Map<InstrumentKey>,
@@ -52,13 +54,17 @@ where
             })
             .collect();
 
-        Ok(Self { instrument_map })
+        Ok(Self {
+            instrument_map,
+            server: PhantomData,
+        })
     }
 }
 
-impl<InstrumentKey> Transformer for BybitOrderBooksL2Transformer<InstrumentKey>
+impl<InstrumentKey, Server> Transformer for BybitOrderBooksL2Transformer<InstrumentKey, Server>
 where
     InstrumentKey: Clone,
+    Server: ExchangeServer,
 {
     type Error = DataError;
     type Input = BybitOrderBookMessage;
@@ -86,7 +92,7 @@ where
             });
 
             return MarketIter::<InstrumentKey, OrderBookEvent>::from((
-                BybitSpot::ID,
+                Server::ID,
                 instrument.key.clone(),
                 input,
             ))
@@ -107,7 +113,7 @@ where
         };
 
         MarketIter::<InstrumentKey, OrderBookEvent>::from((
-            BybitSpot::ID,
+            Server::ID,
             instrument.key.clone(),
             valid_update,
         ))
@@ -127,15 +133,14 @@ impl BybitOrderBookL2Sequencer {
     ) -> Result<Option<BybitOrderBookMessage>, DataError> {
         // Each new update_id should be `last_update_id + 1`
         if update.data.update_id != self.last_update_id + 1 {
-            return Err(DataError::InvalidSequence {
+            Err(DataError::InvalidSequence {
                 prev_last_update_id: self.last_update_id,
                 first_update_id: update.data.update_id,
-            });
+            })
+        } else {
+            // Update metadata
+            self.last_update_id = update.data.update_id;
+            Ok(Some(update))
         }
-
-        // Update metadata
-        self.last_update_id = update.data.update_id;
-
-        Ok(Some(update))
     }
 }

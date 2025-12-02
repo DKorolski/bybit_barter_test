@@ -11,7 +11,10 @@ use crate::{
         Processor,
         clock::HistoricalClock,
         execution_tx::MultiExchangeTxMap,
-        state::{EngineState, instrument::data::InstrumentDataState},
+        state::{
+            EngineState,
+            instrument::{data::InstrumentDataState, filter::InstrumentFilter},
+        },
     },
     error::BarterError,
     risk::RiskManager,
@@ -228,7 +231,7 @@ where
     let system = SystemBuild::new(
         engine,
         EngineFeedMode::Stream,
-        AuditMode::Disabled,
+        AuditMode::Enabled,
         market_stream,
         account_channel,
         futures,

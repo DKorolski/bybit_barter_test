@@ -4,7 +4,7 @@
     "executions": [
       {
         "mocked_exchange": "binance_spot",
-        "latency_ms": 100,
+        "latency_ms": 0,
         "fees_percent": 0.05,
         "initial_state": {
           "exchange": "binance_spot",
@@ -36,8 +36,8 @@
             {
               "asset": "sol",
               "balance": {
-                "total": 10.0,
-                "free": 10.0
+                "total": 20.0,
+                "free": 20.0
               },
               "time_exchange": "2025-03-24T21:30:00Z"
             }

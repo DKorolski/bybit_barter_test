@@ -142,7 +142,7 @@ where
     Server: ExchangeServer + Debug + Send + Sync,
 {
     type SnapFetcher = NoInitialSnapshots;
-    type Stream = ExchangeWsStream<BybitOrderBooksL2Transformer<Instrument::Key>>;
+    type Stream = ExchangeWsStream<BybitOrderBooksL2Transformer<Instrument::Key, Server>>;
 }
 
 impl<'de, Server> serde::Deserialize<'de> for Bybit<Server>

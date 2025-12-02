@@ -35,7 +35,7 @@
   "executions": [
     {
       "mocked_exchange": "binance_spot",
-      "latency_ms": 100,
+      "latency_ms": 0,
       "fees_percent": 0.05,
       "initial_state": {
         "exchange": "binance_spot",

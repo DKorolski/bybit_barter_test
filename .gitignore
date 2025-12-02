@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Python venv
+.venv/
+venv/
+env/
+
+# Rust
+target/
+
+# IDE
+.vscode/
+.idea/

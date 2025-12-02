@@ -1,0 +1,22 @@
+{
+  "risk_free_return": 0.05,
+  "instruments": [
+    {
+      "exchange": "bybit_perpetuals_usd",
+      "name_exchange": "BTCUSDT",
+      "underlying": {
+        "base": "btc",
+        "quote": "usdt"
+      },
+      "quote": "underlying_quote",
+      "kind": {
+        "perpetual": {
+          "contract_size": 1.0,
+          "settlement_asset": "usdt"
+        }
+      },
+      "spec": null
+    }
+  ],
+  "executions": []
+}
